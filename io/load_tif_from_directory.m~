@@ -15,12 +15,7 @@ use_xml = 0;
 
 %the default downsampling in space is 1/2,  I need  to learn to use
 %varargin to make that not the case. -AmyJC
-%If downsampling, we might want to preprocess while loading the movie. 
-%currently preprocess will apply a 3x3 medfilt to each frame as it's
-%loaded. 
-
 downsample = 0;
-preprocess = 0;
 for k = 1:length(varargin)
     if ischar(varargin{k})
         vararg = lower(varargin{k});
@@ -29,8 +24,6 @@ for k = 1:length(varargin)
                 use_xml = 1;
             case {'downsample'}
                 downsample = 1;
-            case {'preprocess'}
-                preprocess = 1;
         end
     end
 end
@@ -55,33 +48,31 @@ for i = 1:length(xml_files)
        end
     end
 end
+    tif_type = info(1).SampleFormat;
 
-info = imfinfo(tif_files{1});
-tif_type = info(1).SampleFormat;
+        switch tif_type
+            case 'Unsigned integer'
+                type = 'uint16';
+            case 'IEEE floating point'
+                type = 'single';
+            otherwise
+                error('load_movie_from_tif: Unrecognized type "%s"\n', tif_type);
+        end
 
-switch tif_type
-    case 'Unsigned integer'
-        type = 'uint16';
-    case 'IEEE floating point'
-        type = 'single';
-    otherwise
-        error('load_movie_from_tif: Unrecognized type "%s"\n', tif_type);
-end
-
-
-width  = info(1).Width;
-height = info(1).Height;
-
-if downsample
-    width = floor(width / 2);
-    height = floor(height / 2);
-end
-
-full_movie = zeros(height,width,sum(trial_frames),type);
+    c_trial_frames = cumsum(trial_frames);
+    info = imfinfo(tif_files{1});
+    width  = info(1).Width;
+    height = info(1).Height;
+    
+    if downsample
+        width = floor(width / 2);
+        height = floor(height / 2);
+    end
+    
+    full_movie = zeros(height,width,sum(trial_frames),type);
 
 total_frame = 0;    
 for i = 1:length(tif_files)
-    tic;
     fprintf('\n\n\n File %d of %d.',i,length(tif_files));
     source = tif_files{i};
     info = imfinfo(source);
@@ -97,17 +88,7 @@ for i = 1:length(tif_files)
             fprintf('  Frames %d / %d loaded\n', k, num_tif_frames);
         end
         t.setDirectory(k);
-        temp = t.read();
-        
-        if downsample
-            temp = temp(1:2:end, 1:2:end, :) + temp(2:2:end, 2:2:end, :);
-        end
-        
-        if preprocess
-            temp = medfilt2(temp);
-        end
-        
-        full_movie(:,:,k + total_frame) = temp;
+        full_movie(:,:,k + total_frame) = t.read();
     end
     t.close();
     
@@ -156,7 +137,7 @@ for i = 1:length(tif_files)
 %     end
     
     
-    
+    tic;
     %just load directly into the movie, to save memory space. We can add a
     %check later for the usexml case. 
     %fprintf('\n Concatenating movie');
