@@ -1,4 +1,4 @@
-function [ m_dfof ] = preprocess( data, sigmaValue )
+function [ data ] = preprocess( movie_in, movie_out,sigmaValue)
     %high pass filters, then dfof's, and masks for
     %vasculature. Usage M = preprocess(M, 40), where the second argument is
     %the radius of the gaussian filter to apply. 
@@ -7,6 +7,9 @@ function [ m_dfof ] = preprocess( data, sigmaValue )
     %Amy JC 9/17/16
 
     %per frame normalization
+    
+    data = load_movie(movie_in);
+    
     av = mean(mean(data));
     data = bsxfun(@rdivide, data, av);
    
@@ -67,5 +70,9 @@ function [ m_dfof ] = preprocess( data, sigmaValue )
         im(idx) = mask_av(idx);
         data(:,:, i) = im;
     end;
+    close(h);
+    
+    save_movie_to_hdf5(data, movie_out);
+    
 end
 
