@@ -41,9 +41,11 @@ for k = 1:length(choices)
         idx = idx + 1;
     end
 end
+
 %%
 %display raster
 imagesc(traces_)
+
 %%
 %save extracted traces
 save('traces.mat', 'traces_')

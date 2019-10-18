@@ -3,8 +3,27 @@ function [] = pp_movie(directory)
     cd(directory);
     movie_file = ls('*.isxd');
     convertInscopixIsxdToHdf5(movie_file);
+    
+    M = load_movie_from_hdf5('movie.h5');
+    
+    S = sum(M,[1,2]);
+    dropped_inds = find(S==0);
+    if length(dropped_inds)>0
+        for i = 1:length(dropped_inds)
+            M(:,:,dropped_inds(i)) = M(:,:,dropped_inds(i)-1);
+        end
+        delete('movie.h5')
+        save_movie_to_hdf5(M,'movie.h5');
+    end
+    clear all
+    
+    
+    
+    
+    
+    
+    
     register_movie('movie.h5','m_reg.hdf5');
-%     M = load_movie_from_hdf5('m_reg.hdf5');
 % 
 %     %view_movie(M);
 % 
@@ -29,11 +48,19 @@ function [] = pp_movie(directory)
 % 
 % save_movie_to_hdf5(M,'m_reg_fixed.hdf5');
 %crop_movie('m_reg_fixed.hdf5','m_reg_crp_fixed.hdf5')
+
+
+% REPLACE DROPPED FRAMES (WILL BE FILLED WITH ZEROS)
+
+
+% CROP MOVIE
+clear all
 crop_movie('m_reg.hdf5','m_reg_crp_fixed.hdf5','automin')
 
 %%
 clear M
-divisive_normalization_ASAC('m_reg_crp_fixed.hdf5','m_norm.hdf5',5);
+divisive_normalization_ASAC('m_reg_crp_fixed.hdf5','m_norm.hdf5',10);
+
 %norm_movie('m_reg_crp_fixed.hdf5','m_norm2.hdf5',20);
 M = load_movie_from_hdf5('m_norm.hdf5');
 m = mean(M, 3);
@@ -45,16 +72,17 @@ clear M
 
 delete('m_norm.hdf5');
 delete('m_reg.hdf5');
-delete('m_reg_fixed.hdf5');
-delete('m_reg_crp_fixed.hdf5');
+ delete('m_reg_fixed.hdf5');
+%delete('m_reg_crp_fixed.hdf5');
 
-M = ['m_dff.hdf5', '::', '/Data/Images'];
+M = ['m_reg_crp_fixed.hdf5', '::', '/Data/Images'];
+M = ['m_reg_crp_fixed.hdf5', '::', '/1'];
 
 config = [];
 
-config.avg_cell_radius = 5;
+config.avg_cell_radius = 7;
 config.cellfind_min_snr = 3;
-config.preprocess = false;  % Assuming the movie is already preprocessed
+%config.preprocess = false;  % Assuming the movie is already preprocessed
 config.dendrite_aware = false;
 config.verbose = 2;
 config.init_maxnum_iters = 500;

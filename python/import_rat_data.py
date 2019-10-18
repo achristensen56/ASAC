@@ -79,6 +79,9 @@ def get_frame_data(input_file):
         rise_times = time[rise_inds]
         fall_times = time[fall_inds]
 
+        if len(rise_times)>len(fall_times):
+            rise_times = rise_times[0:len(fall_times)]
+
         pulse_durs = (fall_times-rise_times)*1000
 
         true_pulse_inds = np.where(pulse_durs>min_pulse_dur)
