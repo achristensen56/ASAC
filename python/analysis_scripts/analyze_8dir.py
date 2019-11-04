@@ -131,7 +131,7 @@ def analyze_8dir_data(filename, spikes = True, stim_start = 45, stim_end = 55, p
 		max_resp = resps[max_ori_ind]
 		min_resp = resps[ori2_ind]
 
-		DSI = (max_resp + min_resp) / (max_resp + min_resp)
+		DSI = (max_resp - min_resp) / (max_resp + min_resp)
 
 		selectivity_mat[j] = [i, max_ori, OSI, DSI]
 
