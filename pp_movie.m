@@ -54,30 +54,12 @@ function [] = pp_movie(directory)
 
 
 % CROP MOVIE
-clear all
-crop_movie('m_reg.hdf5','m_reg_crp_fixed.hdf5','automin')
+% clear all
+% crop_movie('m_reg.hdf5','m_reg_crp_fixed.hdf5','automin')
 
 %%
 clear M
-divisive_normalization_ASAC('m_reg_crp_fixed.hdf5','m_norm.hdf5',10);
-
-%norm_movie('m_reg_crp_fixed.hdf5','m_norm2.hdf5',20);
-M = load_movie_from_hdf5('m_norm.hdf5');
-m = mean(M, 3);
-M = bsxfun(@minus, M, m);
-M = bsxfun(@rdivide, M, max(m, 1e-6));
-save_movie_to_hdf5(M,'m_dff.hdf5');
-clear M
-%crop_movie('m_dff.hdf5','m_dff_crp.hdf5')\
-
-delete('m_norm.hdf5');
-delete('m_reg.hdf5');
- delete('m_reg_fixed.hdf5');
-%delete('m_reg_crp_fixed.hdf5');
-
-M = ['m_reg_crp_fixed.hdf5', '::', '/Data/Images'];
-M = ['m_reg_crp_fixed.hdf5', '::', '/1'];
-
+M = load_movie_from_hdf5('m_reg.hdf5');
 config = [];
 
 config.avg_cell_radius = 7;
@@ -90,12 +72,18 @@ config.downsample_time_by = 1;
 config.num_partitions_y = 1;
 config.num_partitions_x = 1;
 config.downsample_space_by = 1;
+config.fix_zero_FOV_strips = true;
 
 %if you get a GPU, then you can use this
 config.use_gpu = 1;
 config.compute_device = 'gpu';
 
-%actually run extract
+config = get_defaults(config);
+M  = preprocess_movie(M, config);
+save_movie_to_hdf5(M,'m_dff.hdf5');
+
+
+config.preprocess = false;
 output = extractor(M, config);
 
 
@@ -116,10 +104,68 @@ info.type = 'sana ne amk';
 save('rec_extract', 'filters', 'traces', 'info');
 
 
-
-%can rereun starting from here (assuming the movie is loaded and named M,
-%will restart classification where you left off
-%M = load_movie('smoothed.hdf5');
+% %%
+% divisive_normalization_ASAC('m_reg_crp_fixed.hdf5','m_norm.hdf5',10);
+% 
+% %norm_movie('m_reg_crp_fixed.hdf5','m_norm2.hdf5',20);
+% M = load_movie_from_hdf5('m_norm.hdf5');
+% m = mean(M, 3);
+% M = bsxfun(@minus, M, m);
+% M = bsxfun(@rdivide, M, max(m, 1e-6));
+% save_movie_to_hdf5(M,'m_dff.hdf5');
+% clear M
+% %crop_movie('m_dff.hdf5','m_dff_crp.hdf5')\
+% 
+% delete('m_norm.hdf5');
+% delete('m_reg.hdf5');
+%  delete('m_reg_fixed.hdf5');
+% %delete('m_reg_crp_fixed.hdf5');
+% 
+% M = ['m_reg_crp_fixed.hdf5', '::', '/Data/Images'];
+% M = ['m_reg_crp_fixed.hdf5', '::', '/1'];
+% 
+% config = [];
+% 
+% config.avg_cell_radius = 7;
+% config.cellfind_min_snr = 3;
+% %config.preprocess = false;  % Assuming the movie is already preprocessed
+% config.dendrite_aware = false;
+% config.verbose = 2;
+% config.init_maxnum_iters = 500;
+% config.downsample_time_by = 1;
+% config.num_partitions_y = 1;
+% config.num_partitions_x = 1;
+% config.downsample_space_by = 1;
+% 
+% %if you get a GPU, then you can use this
+% config.use_gpu = 1;
+% config.compute_device = 'gpu';
+% 
+% %actually run extract
+% output = extractor(M, config);
+% 
+% 
+% % %collecting the filters and traces from extract
+% % [d1, d2, d3] = size(output.spatial_weights);
+% % F1 = reshape(output.spatial_weights,d1*d2, d3);
+% % T1 = output.temporal_weights';
+% 
+% %plotting the cell map
+% %
+% 
+% %This block saves the outputs of Extract and runs the classifier
+% %q = quite, s = save, c = correct, n = not correct
+% filters = output.spatial_weights;
+% traces = output.temporal_weights;
+% info.num_pairs = size(traces, 2);
+% info.type = 'sana ne amk';
+% save('rec_extract', 'filters', 'traces', 'info');
+% 
+% 
+% 
+% %can rereun starting from here (assuming the movie is loaded and named M,
+% %will restart classification where you left off
+% %M = load_movie('smoothed.hdf5');
 %%
 % M = load_movie_from_hdf5('m_dff.hdf5');
 % 
