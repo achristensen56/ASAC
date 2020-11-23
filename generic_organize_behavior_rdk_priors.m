@@ -1,3 +1,4 @@
+clear all
 load('terry_session1.mat');
 
 all_data = struct;
@@ -36,7 +37,7 @@ completed_trials_data = struct;
 
 
 % MAKE STIM AND RESPONSE ALIGNED NEURAL DATA
-traces = all_data.traces;
+traces = all_data.traces';
 sf = frame_info.stim_start_frame;
 rf = frame_info.response_frame;
 traces_stim_aligned = [];
