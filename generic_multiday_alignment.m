@@ -1,10 +1,26 @@
 ds1 = DaySummary('', ''); % adam0_20190624 ; adam0_20190731 % adam0_20190228 % anton120190302 % terry20190216 %adam0_20190516 (task) % terry20190216 %adam0_2019303 (task) % adam0_20190812b
 choices1 = load('choices.mat'); choices1 = choices1.choices;
 
+
+for i = 1:length(ds1.cells)
+    if choices1(i)==1
+        ds1.cells(i).label = 'cell';
+    else
+        ds1.cells(i).label = 'not a cell';
+    end
+end
+
 ds2 = DaySummary('', ''); % 0704 ; adam0_20190729 % adam0_20190301 % anton1_20190228          % terry20190214 %adam0_20190302 (tune) % terry20190214 %adam0_20190302 (tune) % adam0_20190731 (tune_
 choices2 = load('choices.mat'); choices2 = choices2.choices;
 
 
+for i = 1:length(ds2.cells)
+    if choices2(i)==1
+        ds2.cells(i).label = 'cell';
+    else
+        ds2.cells(i).label = 'not a cell';
+    end
+end
 
 ds3 = DaySummary('',''); %07 29
 ds4 = DaySummary('','');
@@ -12,6 +28,11 @@ ds4 = DaySummary('','');
 [match_1to2, match_2to1] = run_alignment(ds1, ds2);
 [match_2to3, match_3to2] = run_alignment(ds2, ds3);
 %[match_3to4, match_4to3] = run_alignment(ds3, ds4);
+
+ds_list = {1, ds1; 2, ds2};
+match_list = {1, 2, match_1to2, match_2to1};
+md = MultiDay(ds_list, match_list);
+
 
 ds_list = {1, ds1; 2, ds2; 3, ds3};
 match_list = {1, 2, match_1to2, match_2to1; 2, 3, match_2to3, match_3to2};
@@ -76,3 +97,10 @@ tune_inds = match_inds(:,2);
 save('task_inds.mat','task_inds');
 save('tune_inds.mat','tune_inds');
 save('multiday_variables.mat');
+
+
+MI = md.matched_indices;
+
+for i = 1:length
+    
+end

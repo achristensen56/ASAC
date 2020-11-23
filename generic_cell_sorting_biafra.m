@@ -6,6 +6,9 @@ inputSignals = traces'; % cell array of [nSignals frames] matrices containing ea
 iopts.inputMovie = ['.' filesep 'm_dff.hdf5'];
 iopts.inputDatasetName = '/Data/Images'; % HDF5 dataset name
 
+%iopts.inputMovie = ['.' filesep 'mc_ds2_norm_dff.hdf5'];
+%iopts.inputDatasetName = '/mov'; % HDF5 dataset name
+
 % MAIN USER parameters: change these as needed
 iopts.preComputeImageCutMovies = 0; % Binary: 0 recommended. 1 = pre-compute movies aligned to signal transients, 0 = do not pre-compute.
 iopts.readMovieChunks = 1; % Binary: 1 recommended. 1 = read movie from HDD, 0 = load entire movie into RAM.
@@ -17,6 +20,7 @@ iopts.thresholdOutline = 0.3; % threshold for thresholding images
 
 % OPTIONAL
 iopts.valid = 'neutralStart'; % all choices start out gray or neutral to not bias user
+%iopts.valid = choices;
 iopts.cropSizeLength = 20; % region, in px, around a signal source for transient cut movies (subplot 2)
 iopts.cropSize = 20; % see above
 iopts.medianFilterTrace = 0; % whether to subtract a rolling median from trace
@@ -50,3 +54,16 @@ imagesc(traces_)
 %save extracted traces
 save('traces.mat', 'traces_')
 save('unsorted_traces.mat','traces')
+
+
+filt1= zeros(size(filters,1),size(filters,2),num_classified_cells);
+idx = 1;
+for k = 1:length(choices)
+    if choices(k)
+        filt1(:,:,idx) = filters(:,:,k);
+        idx = idx + 1;
+    end
+end
+
+
+filters = filt1;

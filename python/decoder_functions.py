@@ -23,7 +23,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import HuberRegressor
 from sklearn.naive_bayes import GaussianNB
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 
 
